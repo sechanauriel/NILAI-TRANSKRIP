@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Trail - Grade & Transcript System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI'; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+        .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 70%; }
+        button { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95em; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #667eea; color: white; }
+        tr:hover { background: #f5f5f5; }
+        .no-data { text-align: center; color: #999; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Grade Change Audit Trail</h1>
+            <a href="/" style="background: #667eea; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;">← Back</a>
+        </header>
+        
+        <div class="card">
+            <div>
+                <input type="text" id="nimAudit" placeholder="Enter Student NIM" maxlength="10">
+                <button onclick="loadAuditTrail()">Load Audit Trail</button>
+            </div>
+            
+            <div id="auditContent" style="display: none;">
+                <h2 style="margin: 20px 0 15px 0;">Changes History</h2>
+                <table id="auditTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Course</th>
+                            <th>Old Grade</th>
+                            <th>New Grade</th>
+                            <th>Changed By</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <div id="noAudit" class="no-data">No changes recorded</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadAuditTrail() {
+            const nim = document.getElementById('nimAudit').value.trim();
+            if (!nim) { alert('Please enter a NIM'); return; }
+            
+            try {
+                const response = await fetch(`/api/audit-trail/${nim}`);
+                if (!response.ok) { alert('No data found'); return; }
+                
+                const history = await response.json();
+                document.getElementById('auditContent').style.display = 'block';
+                
+                if (history.length === 0) {
+                    document.getElementById('auditTable').style.display = 'none';
+                    document.getElementById('noAudit').style.display = 'block';
+                    return;
+                }
+                
+                const tbody = document.querySelector('#auditTable tbody');
+                tbody.innerHTML = history.map(h => `
+                    <tr>
+                        <td>${new Date(h.changed_at).toLocaleString()}</td>
+                        <td>${h.course_name}</td>
+                        <td>${h.old_numeric_grade ? h.old_numeric_grade.toFixed(2) : '-'}</td>
+                        <td>${h.new_numeric_grade ? h.new_numeric_grade.toFixed(2) : '-'}</td>
+                        <td>${h.changed_by}</td>
+                        <td>${h.reason || '-'}</td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('auditTable').style.display = 'table';
+                document.getElementById('noAudit').style.display = 'none';
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        document.getElementById('nimAudit').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadAuditTrail();
+        });
+    </script>
+</body>
+</html>

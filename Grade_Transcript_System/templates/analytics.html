@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - Grade & Transcript System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI'; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        header { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .back-btn { background: #667eea; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        .card { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 5px; width: 70%; }
+        button { padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; }
+        .stat-value { font-size: 2em; font-weight: bold; margin: 10px 0; }
+        .stat-label { font-size: 0.9em; opacity: 0.9; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #667eea; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📈 Analytics & Reports</h1>
+            <a href="/" style="background: #667eea; color: white; padding: 10px 20px; border-radius: 5px; text-decoration: none;">← Back</a>
+        </header>
+        
+        <div class="card">
+            <h2>Performance Statistics</h2>
+            <div style="margin: 15px 0;">
+                <input type="text" id="nimAnalytics" placeholder="Enter Student NIM" maxlength="10">
+                <button onclick="loadAnalytics()">Load Statistics</button>
+            </div>
+            
+            <div id="analyticsContent" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Courses</div>
+                        <div class="stat-value" id="totalCourses">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Passed</div>
+                        <div class="stat-value" id="passedCourses">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Failed</div>
+                        <div class="stat-value" id="failedCourses">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Average Grade</div>
+                        <div class="stat-value" id="avgGrade">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadAnalytics() {
+            const nim = document.getElementById('nimAnalytics').value.trim();
+            if (!nim) { alert('Please enter a NIM'); return; }
+            
+            try {
+                const response = await fetch(`/api/performance-stats/${nim}`);
+                if (!response.ok) { alert('Student not found'); return; }
+                
+                const stats = await response.json();
+                document.getElementById('totalCourses').textContent = stats.total_courses;
+                document.getElementById('passedCourses').textContent = stats.passed_courses;
+                document.getElementById('failedCourses').textContent = stats.failed_courses;
+                document.getElementById('avgGrade').textContent = stats.average_grade.toFixed(2);
+                document.getElementById('analyticsContent').style.display = 'block';
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+        
+        document.getElementById('nimAnalytics').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loadAnalytics();
+        });
+    </script>
+</body>
+</html>

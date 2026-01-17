@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Management - Grade & Transcript System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        header h1 {
+            color: #333;
+            font-size: 1.8em;
+        }
+        
+        .back-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+        
+        .back-btn:hover {
+            background: #764ba2;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-secondary {
+            background: #ddd;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #ccc;
+        }
+        
+        .message {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .student-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .student-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .student-item:hover {
+            background: #f5f5f5;
+            transform: translateX(5px);
+        }
+        
+        .student-item.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .student-name {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .student-id {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Grade Management</h1>
+            <a href="/" class="back-btn">← Back to Home</a>
+        </header>
+        
+        <div class="main-content">
+            <div class="card">
+                <h2>Select Student</h2>
+                <div class="student-list" id="studentList">
+                    <p style="color: #999;">Loading students...</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Input Grade</h2>
+                <div id="message"></div>
+                
+                <form id="gradeForm">
+                    <div class="form-group">
+                        <label for="selectedStudent">Student</label>
+                        <input type="text" id="selectedStudent" readonly style="background: #f5f5f5;">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="courseCode">Course</label>
+                        <select id="courseCode" required>
+                            <option value="">Select Course...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="semester">Semester</label>
+                        <select id="semester" required>
+                            <option value="">Select Semester...</option>
+                            <option value="1">Semester 1</option>
+                            <option value="2">Semester 2</option>
+                            <option value="3">Semester 3</option>
+                            <option value="4">Semester 4</option>
+                            <option value="5">Semester 5</option>
+                            <option value="6">Semester 6</option>
+                            <option value="7">Semester 7</option>
+                            <option value="8">Semester 8</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="letterGrade">Grade (A-E)</label>
+                        <select id="letterGrade" required>
+                            <option value="">Select Grade...</option>
+                            <option value="A">A (4.0)</option>
+                            <option value="B">B (3.0)</option>
+                            <option value="C">C (2.0)</option>
+                            <option value="D">D (1.0)</option>
+                            <option value="E">E (0.0)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="presence">Presence (%)</label>
+                        <input type="number" id="presence" min="0" max="100" step="0.1" value="75" required>
+                        <small style="color: #666;">Minimum 75% required</small>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="submit" class="btn-primary">Submit Grade</button>
+                        <button type="reset" class="btn-secondary">Clear</button>
+                    </div>
+                </form>
+                
+                <h2 style="margin-top: 30px;">Student Grades</h2>
+                <table id="gradesTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Semester</th>
+                            <th>Grade</th>
+                            <th>Value</th>
+                            <th>Presence</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <p id="noGrades" style="color: #999;">No grades yet</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedNim = null;
+        
+        // Load students
+        async function loadStudents() {
+            try {
+                const response = await fetch('/api/students');
+                const students = await response.json();
+                
+                const listHtml = students.map(s => 
+                    `<div class="student-item" data-nim="${s.nim}" onclick="selectStudent('${s.nim}', '${s.name}')">
+                        <div class="student-name">${s.name}</div>
+                        <div class="student-id">${s.nim} - ${s.program_study}</div>
+                    </div>`
+                ).join('');
+                
+                document.getElementById('studentList').innerHTML = listHtml;
+            } catch (error) {
+                console.error('Error loading students:', error);
+            }
+        }
+        
+        // Load courses
+        async function loadCourses() {
+            try {
+                const response = await fetch('/api/courses');
+                const courses = await response.json();
+                
+                const select = document.getElementById('courseCode');
+                const optionsHtml = courses.map(c => 
+                    `<option value="${c.course_code}">${c.course_code} - ${c.course_name}</option>`
+                ).join('');
+                
+                select.innerHTML = '<option value="">Select Course...</option>' + optionsHtml;
+            } catch (error) {
+                console.error('Error loading courses:', error);
+            }
+        }
+        
+        // Select student
+        function selectStudent(nim, name) {
+            selectedNim = nim;
+            document.getElementById('selectedStudent').value = `${name} (${nim})`;
+            
+            // Update active state
+            document.querySelectorAll('.student-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.student-item').classList.add('active');
+            
+            // Load grades for student
+            loadStudentGrades(nim);
+        }
+        
+        // Load student grades
+        async function loadStudentGrades(nim) {
+            try {
+                const response = await fetch(`/api/grades/${nim}`);
+                const grades = await response.json();
+                
+                if (grades.length === 0) {
+                    document.getElementById('gradesTable').style.display = 'none';
+                    document.getElementById('noGrades').style.display = 'block';
+                    return;
+                }
+                
+                const tbody = document.querySelector('#gradesTable tbody');
+                tbody.innerHTML = grades.map(g => `
+                    <tr>
+                        <td>${g.course_code}</td>
+                        <td>${g.semester}</td>
+                        <td>${g.letter_grade}</td>
+                        <td>${g.numeric_grade.toFixed(2)}</td>
+                        <td>${g.presence_percentage.toFixed(1)}%</td>
+                    </tr>
+                `).join('');
+                
+                document.getElementById('gradesTable').style.display = 'table';
+                document.getElementById('noGrades').style.display = 'none';
+            } catch (error) {
+                console.error('Error loading grades:', error);
+            }
+        }
+        
+        // Submit grade
+        document.getElementById('gradeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedNim) {
+                showMessage('Please select a student first', 'error');
+                return;
+            }
+            
+            const data = {
+                nim: selectedNim,
+                course_code: document.getElementById('courseCode').value,
+                semester: document.getElementById('semester').value,
+                letter_grade: document.getElementById('letterGrade').value,
+                presence_percentage: parseFloat(document.getElementById('presence').value)
+            };
+            
+            try {
+                const response = await fetch('/api/grade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                showMessage(result.message, result.success ? 'success' : 'error');
+                
+                if (result.success) {
+                    document.getElementById('gradeForm').reset();
+                    loadStudentGrades(selectedNim);
+                }
+            } catch (error) {
+                showMessage('Error submitting grade: ' + error.message, 'error');
+            }
+        });
+        
+        function showMessage(msg, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.className = `message ${type}`;
+            msgDiv.textContent = msg;
+            setTimeout(() => msgDiv.textContent = '', 5000);
+        }
+        
+        // Initialize
+        loadStudents();
+        loadCourses();
+    </script>
+</body>
+</html>

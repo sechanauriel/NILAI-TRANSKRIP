@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Transcript - Grade & Transcript System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        header h1 {
+            color: #333;
+            font-size: 1.8em;
+        }
+        
+        .back-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+        
+        .back-btn:hover {
+            background: #764ba2;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        input, button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        
+        input {
+            flex: 1;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background: #764ba2;
+        }
+        
+        .transcript {
+            display: none;
+        }
+        
+        .student-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .student-info p {
+            margin: 5px 0;
+            color: #333;
+        }
+        
+        .semester-block {
+            margin-bottom: 25px;
+        }
+        
+        .semester-header {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #e8eaf6;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        tr:hover {
+            background: #f5f5f5;
+        }
+        
+        .summary {
+            background: #e8eaf6;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .summary-label {
+            color: #999;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .summary-value {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .download-btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+        
+        .download-btn:hover {
+            background: #45a049;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📋 View Transcript</h1>
+            <a href="/" class="back-btn">← Back to Home</a>
+        </header>
+        
+        <div class="card">
+            <div class="form-group">
+                <input type="text" id="nimInput" placeholder="Enter Student NIM (e.g., 21001)" maxlength="10">
+                <button onclick="viewTranscript()">View Transcript</button>
+            </div>
+        </div>
+        
+        <div class="card transcript" id="transcriptContainer">
+            <div class="loading" id="loading" style="display: none;">Loading transcript...</div>
+            
+            <div id="transcriptContent" style="display: none;">
+                <div class="student-info">
+                    <p><strong>NIM:</strong> <span id="nim"></span></p>
+                    <p><strong>Name:</strong> <span id="name"></span></p>
+                    <p><strong>Program:</strong> <span id="program"></span></p>
+                    <p><strong>Batch Year:</strong> <span id="batch"></span></p>
+                </div>
+                
+                <div id="semestersContainer"></div>
+                
+                <div class="summary">
+                    <h3>Academic Summary</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="summary-label">Total SKS</div>
+                            <div class="summary-value" id="totalSks">-</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">IPK (Cumulative GPA)</div>
+                            <div class="summary-value" id="ipk">-</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Graduation Predicate</div>
+                            <div class="summary-value" id="predicate" style="font-size: 1.2em;">-</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Semesters Completed</div>
+                            <div class="summary-value" id="semesters">-</div>
+                        </div>
+                    </div>
+                    
+                    <button class="download-btn" onclick="downloadPDF()">📥 Download PDF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function viewTranscript() {
+            const nim = document.getElementById('nimInput').value.trim();
+            
+            if (!nim) {
+                alert('Please enter a NIM');
+                return;
+            }
+            
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('transcriptContent').style.display = 'none';
+                document.getElementById('transcriptContainer').style.display = 'block';
+                
+                const response = await fetch(`/api/transcript/${nim}`);
+                
+                if (!response.ok) {
+                    alert('Transcript not found');
+                    document.getElementById('transcriptContainer').style.display = 'none';
+                    return;
+                }
+                
+                const transcript = await response.json();
+                displayTranscript(transcript, nim);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading transcript: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        function displayTranscript(transcript, nim) {
+            const student = transcript.student;
+            
+            document.getElementById('nim').textContent = student.nim;
+            document.getElementById('name').textContent = student.name;
+            document.getElementById('program').textContent = student.program_study;
+            document.getElementById('batch').textContent = student.batch_year;
+            document.getElementById('totalSks').textContent = transcript.total_sks;
+            document.getElementById('ipk').textContent = transcript.ipk.toFixed(2);
+            document.getElementById('predicate').textContent = transcript.graduation_predicate;
+            document.getElementById('semesters').textContent = transcript.number_of_semesters;
+            
+            // Display semesters
+            const semestersHtml = transcript.semesters.map(sem => `
+                <div class="semester-block">
+                    <div class="semester-header">Semester ${sem.semester} - IPS: ${sem.ips.toFixed(2)}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th>SKS</th>
+                                <th>Grade</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sem.courses.map(c => `
+                                <tr>
+                                    <td>${c.course_code}</td>
+                                    <td>${c.course_name}</td>
+                                    <td>${c.sks}</td>
+                                    <td>${c.letter_grade}</td>
+                                    <td>${c.numeric_grade.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `).join('');
+            
+            document.getElementById('semestersContainer').innerHTML = semestersHtml;
+            document.getElementById('transcriptContent').style.display = 'block';
+        }
+        
+        function downloadPDF() {
+            const nim = document.getElementById('nimInput').value.trim();
+            window.location.href = `/download-transcript/${nim}`;
+        }
+        
+        // Allow Enter key to search
+        document.getElementById('nimInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                viewTranscript();
+            }
+        });
+    </script>
+</body>
+</html>
